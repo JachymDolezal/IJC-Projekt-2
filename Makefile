@@ -6,8 +6,8 @@
  # které se spouští pomocí příkazů: "make run" a "make steg".
 
 CC = gcc
-CPPFLAGS = -g -std=c++ -pedantic -Wall -Wextra -02
-CFLAGS = -g -std=c11 -pedantic -Wall -Wextra -O2
+CPPFLAGS = -g -std=c++ -pedantic -Wall -Wextra 
+CFLAGS = -g -std=c11 -pedantic -Wall -Wextra 
 MATH = -lm
 EXEC = tail wordcount_c wordcount_cpp
 OBJ = error.o tail.o
