@@ -3,19 +3,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "error.h"
 #include "htab.h"
 
+#define VZK_SIZE 9
 // v libhtab
+typedef struct htab_item htab_item_t;
 
-typedef struct htab_item {
+struct htab_item {
     htab_pair_t pair;
-    htab_item* next;
-} htab_item;
+    htab_item_t* next;
+};
 
-struct htab_t {
-    htab_value_t size;
-    htab_value_t arr_size;
-    htab_item** arr_ptr;
+struct htab {
+    size_t size;
+    size_t arr_size;
+    struct htab_item** arr_ptr;
 };
 
 // v htab.h
@@ -31,37 +34,189 @@ size_t htab_hash_function(htab_key_t str) {
 }
 
 // Funkce pro práci s tabulkou:
-htab_t* htab_init(size_t n) {}
-size_t htab_size(const htab_t* t) {}
-size_t htab_bucket_count(const htab_t* t) {}
-void htab_resize(htab_t* t, size_t newn) {}
-// (umožňuje rezervaci místa)
+htab_t* htab_init(size_t n) {
+    if (n == 0) {
+        error_exit("Chyba: tabulka musí obsahovat alespoň jeden řádek.");
+    }
+    htab_t* htab_new = malloc(sizeof(htab_t));
+    if (htab_new == NULL) {
+        return NULL;
+    }
+    htab_new->arr_ptr = malloc(sizeof(htab_item_t*) * n);
+    if (htab_new->arr_ptr == NULL) {
+        return NULL;
+    }
 
-htab_pair_t* htab_find(htab_t* t, htab_key_t key) {}
-htab_pair_t* htab_lookup_add(htab_t* t, htab_key_t key) {}
+    htab_new->size = 0;
+    htab_new->arr_size = n;
+
+    for (size_t i = 0; i < n; i++) {
+        htab_new->arr_ptr[i] = NULL;
+    }
+
+    return htab_new;
+}
+
+size_t htab_size(const htab_t* t) {
+    return t->size;
+}
+size_t htab_bucket_count(const htab_t* t) {
+    return t->arr_size;
+}
+
+// void htab_resize(htab_t* t, size_t newm) {
+/*
+todo
+vytvori novou tabulku
+
+-> vzit zaznam ze stare a pridat ho do nove (prehashovani)
+-> vzit data z value_stary -> value_novy
+*/
+// }
+// // (umožňuje rezervaci místa)
+
+htab_pair_t* htab_find(htab_t* t, const htab_key_t key) {
+    size_t index = htab_hash_function(key) % t->arr_size;
+    htab_item_t* tmp = t->arr_ptr[index];
+
+    if (tmp == NULL) {
+        return NULL;
+    }
+
+    while (tmp != NULL) {
+        if (!strcmp(tmp->pair.key, key)) {
+            return &(tmp->pair);
+        }
+        tmp = tmp->next;
+    }
+
+    return NULL;
+}
+
+htab_item_t* create_new_pair(htab_key_t key) {
+    htab_item_t* new_pair = malloc(sizeof(htab_item_t));
+    if (new_pair == NULL) {
+        return NULL;
+    }
+
+    size_t str_size = strlen(key) + 1;
+    new_pair->pair.key = malloc(str_size);
+    if (new_pair->pair.key == NULL) {
+        free(new_pair);
+        return NULL;
+    }
+    memcpy((char*)new_pair->pair.key, key, str_size);
+    new_pair->next = NULL;
+    new_pair->pair.value = 0;
+
+    return new_pair;
+}
+
+htab_pair_t* htab_lookup_add(htab_t* t, htab_key_t key) {
+    size_t index = (htab_hash_function(key) % t->arr_size);
+    htab_item_t* tmp = t->arr_ptr[index];
+    htab_pair_t* p = htab_find(t, key);
+    if (p != NULL) {
+        return p;
+    }
+
+    htab_item_t* new_pair = create_new_pair(key);
+    if (new_pair == NULL) {
+        return NULL;
+    }
+    t->size++;
+
+    if (t->arr_ptr[index] == NULL) {
+        t->arr_ptr[index] = new_pair;
+    } else {
+        while (tmp->next != NULL) {
+            tmp = tmp->next;
+        }
+        tmp->next = new_pair;
+    }
+    return &(new_pair->pair);
+}
 
 bool htab_erase(htab_t* t, htab_key_t key) {
+    // find -> erase freepo
+    // todo check AVG_LEN_MAX if below -> resize 1/2 size
     return true;
 }
 
-// for_each: projde všechny záznamy a zavolá na ně funkci f
-// Pozor: f nesmí měnit klíč .key ani přidávat/rušit položky
-void htab_for_each(const htab_t* t, void (*f)(htab_pair_t* data)) {}
+// // for_each: projde všechny záznamy a zavolá na ně funkci f
+// // Pozor: f nesmí měnit klíč .key ani přidávat/rušit položky
+// void htab_for_each(const htab_t* t, void (*f)(htab_pair_t* data)) {
+//     /*
+//     todo
 
-void htab_clear(htab_t* t) {}
-void htab_free(htab_t* t) {}
+//     - goes through all pairs, [index] -> all pairs until NULL
+//     - for each pair apply f to all pairs, make sure that f does not
+//     change key and add/delete any elements
+
+//     */
+// }
+
+void htab_clear(htab_t* t) {
+    for (size_t i = 0; i < t->arr_size; i++) {
+        if (t->arr_ptr[i] != NULL) {
+            htab_item_t* pair = t->arr_ptr[i];
+            while (pair != NULL) {
+                htab_item_t* tmp = pair->next;
+                free((char*)pair->pair.key);
+                free(pair);
+                pair = tmp;
+            }
+            t->arr_ptr[i] = NULL;
+        }
+    }
+}
+void htab_free(htab_t* t) {
+    htab_clear(t);
+
+    free(t->arr_ptr);
+    free(t);
+}
 
 int main() {
-    int array_size = 10;
+    htab_t* h = htab_init(VZK_SIZE);
+    printf("htab number of elements: %ld\n", htab_size(h));
+    printf("htab array size: %ld\n", htab_bucket_count(h));
 
-    printf("%d\n", htab_hash_function("bob") % array_size);
-    printf("%d\n", htab_hash_function("tom") % array_size);
-    printf("%d\n", htab_hash_function("steve") % array_size);
-    printf("%d\n", htab_hash_function("rose") % array_size);
-    printf("%d\n", htab_hash_function("jerry") % array_size);
-    printf("%d\n", htab_hash_function("alphons") % array_size);
-    printf("%d\n", htab_hash_function("kate") % array_size);
-    printf("%d\n", htab_hash_function("jimmy") % array_size);
-    printf("%d\n", htab_hash_function("peter") % array_size);
+    char* vzk[VZK_SIZE] = {"michal",  "oliver", "martinS", "martinA", "albert",
+                           "krystof", "tonda",  "dan",     "vojta"};
+
+    for (int i = 0; i < VZK_SIZE; i++) {
+        printf("index : %ld, name : %s \n",
+               htab_hash_function(vzk[i]) % VZK_SIZE, vzk[i]);
+        htab_pair_t* p = htab_lookup_add(h, vzk[i]);
+        printf("added %s with data: %d\n", p->key, p->value);
+    }
+    for (size_t i = 0; i < h->arr_size; i++) {
+        if (h->arr_ptr[i] == NULL) {
+            printf("yes\n");
+        } else {
+            printf("not clean\n");
+        }
+    }
+    printf("index test : %ld\n", htab_hash_function("dan") % VZK_SIZE);
+    printf("index test : %ld\n", htab_hash_function("dan") % VZK_SIZE);
+    printf("htab number of elements: %ld\n", htab_size(h));
+    for (int i = 0; i < VZK_SIZE; i++) {
+        htab_pair_t* f = htab_find(h, vzk[i]);
+        printf("found %s\n", f->key);
+    }
+    // printf("%s\n", h->arr_ptr[5]->pair.key);
+
+    // printf("%ld\n", htab_hash_function("michal") % array_size);
+    // printf("%ld\n", htab_hash_function("oliver") % array_size);
+    // printf("%ld\n", htab_hash_function("martin") % array_size);
+    // printf("%ld\n", htab_hash_function("martin") % array_size);
+    // printf("%ld\n", htab_hash_function("albert") % array_size);
+    // printf("%ld\n", htab_hash_function("krystof") % array_size);
+    // printf("%ld\n", htab_hash_function("tonda") % array_size);
+    // printf("%ld\n", htab_hash_function("dan") % array_size);
+    // printf("%ld\n", htab_hash_function("vojta") % array_size);
+
+    htab_free(h);
     return 0;
 }
