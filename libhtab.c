@@ -4,22 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "error.h"
-#include "htab.h"
+#include "htab_private.h"
 
 #define VZK_SIZE 9
 // v libhtab
-typedef struct htab_item htab_item_t;
-
-struct htab_item {
-    htab_pair_t pair;
-    htab_item_t* next;
-};
-
-struct htab {
-    size_t size;
-    size_t arr_size;
-    struct htab_item** arr_ptr;
-};
 
 // v htab.h
 
