@@ -11,8 +11,11 @@
 
 int main(int argc, char* argv[]) {
     // param check
+    bool error = false;
     if (argc > 4) {
-        error_exit("Chyba: nepovolený počet argumentů.");
+        error_exit(
+            "Chyba: nepovolený počet argumentů.\nPoužití: %s[-n][cislo][file] ",
+            argv[0]);
     }
 
     long n = 10;
@@ -20,24 +23,76 @@ int main(int argc, char* argv[]) {
     FILE* file;
     int file_name = 0;
 
-    for (int i = 1; i < argc; i++) {
-        // printf("argument: %d %s\n", i, argv[i]);
-        if (argv[i][0] == '-' && argv[i][1] == 'n') {
-            n = strtol(argv[i + 1], &arg_check, 10);
-            if (strlen(arg_check) > 0) {
-                error_exit("Chyba: nepovolený typ za přepínačem -n\n");
+    switch (argc) {
+        case 1:
+            break;
+        case 2:
+            file_name = 1;
+            break;
+        case 3:
+            if (argv[1][0] == '-') {
+                if (argv[1][1] == 'n') {
+                    n = strtol(argv[2], &arg_check, 10);
+                    if (strlen(arg_check) > 0) {
+                        error = true;
+                        break;
+                    }
+                } else {
+                    error = true;
+                    break;
+                }
+            } else {
+                error = true;
+                break;
             }
-            i++;
-        } else {
-            file_name = i;
-        }
+            break;
+        case 4:
+            if (argv[1][0] == '-') {
+                if (argv[1][1] == 'n') {
+                    n = strtol(argv[2], &arg_check, 10);
+                    if (strlen(arg_check) > 0) {
+                        error = true;
+                        break;
+                    }
+                } else {
+                    error = true;
+                    break;
+                }
+                file_name = 3;
+            } else {
+                file_name = 1;
+                if (argv[2][0] == '-') {
+                    if (argv[2][1] == 'n') {
+                        n = strtol(argv[3], &arg_check, 10);
+                        if (strlen(arg_check) > 0) {
+                            error = true;
+                            break;
+                        }
+                    } else {
+                        error = true;
+                        break;
+                    }
+                } else {
+                    error = true;
+                    break;
+                }
+                break;
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (error == true) {
+        error_exit(
+            "Chyba: nepovolený vstupní parametr\nPoužití: %s "
+            "[-n][cislo][file]",
+            argv[0]);
     }
 
     // todo check ze nacitany radek je mensi nez implementacni limit.
     //  printf("n: %d\n file: %s\n", n, argv[file_name]);
 
-    // todo argument parsing
-    // using get opt
     if (file_name == 0) {
         file = stdin;
     } else {

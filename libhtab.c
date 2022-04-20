@@ -1,3 +1,10 @@
+/*
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief 2. příklad - knihovna
+ * @date 19.4.2022
+ */
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -216,6 +223,13 @@ void htab_clear(htab_t* t) {
         }
     }
 }
+
+/*
+ * @brief
+ * @param
+ * @return
+ */
+
 void htab_free(htab_t* t) {
     htab_clear(t);
     // debug for

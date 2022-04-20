@@ -3,42 +3,45 @@
  # Autor: Jáchym Doležal, FIT
  # Login: xdolez0c
  # Popis: Makefile pomoci příkazu: "make" vytvoří všechny spustitelné soubory,
- # které se spouští pomocí příkazů: "make run" a "make steg".
 
 CC = gcc
-CPPFLAGS = -g -std=c++ -pedantic -Wall -Wextra 
+CPPFLAGS = -g -std=c++17 -pedantic -Wall -Wextra 
 CFLAGS = -g -std=c11 -pedantic -Wall -Wextra 
-MATH = -lm
-EXEC = tail wordcount_c wordcount_cpp
+
+EXEC = tail wordcount wordcount-dynamic
 OBJ = error.o tail.o
-all: tail wordcount_c wordcount_cpp
 
-#todo zjistit co je potreba 
-
-#todo zjistit jak funguje linkovani knihoven
-
-htab: libhtab.o error.o tail.o
-	$(CC) $(CFLAGS) error.o libhtab.o -o htab $(MATH)
+all: tail wordcount wordcount-dynamic
 
 tail: tail.o error.o 
-	$(CC) $(CFLAGS) $(OBJ) -o tail $(MATH)
+	$(CC) $(CFLAGS) $(OBJ) -o tail
 
-wordcount_c: 
-	$(CC) $(CFLAGS) $(INLINE) $(OBJ) -o wordcount_c$(MATH)
+wordcount: htab_lib error.o wordcount_c.o io.o
+	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount htablib.a
 
-wordcount_cpp: 
-	$(CC) $(CFLAGS) $(OBJ) -o wordcount_cpp $(MATH)
+wordcount-dynamic: error.o htab_dynamic wordcount_c.o io.o
+	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount-dynamic htablib.so
 
-libhtab.o: libhtab.c htab.h
-	$(CC) $(CFLAGS) -c libhtab.c -o libhtab.o
+htab_lib: htab_static
+	ar rsv htablib.a htab_*.o
+
+htab_static: error.o htab.h
+	$(CC) $(CFLAGS) -c htab_*.c
+
+htab_dynamic: htab.h htab_private.h
+	gcc -shared -o htablib.so -fpic htab_*.c
+
+io.o: error.o
+	$(CC) $(CFLAGS) -c io.c -o io.o
+
+wordcount_c.o: htab.h wordcount.c
+	$(CC) $(CFLAGS) -c wordcount.c -o wordcount_c.o
 
 error.o: error.c error.h
 	$(CC) $(CFLAGS) -c error.c -o error.o
 
 tail.o: tail.c error.o
 	$(CC) $(CFLAGS) -c tail.c -o tail.o
-
-
 
 #util
 
