@@ -1,48 +1,42 @@
-// htab.h -- rozhraní knihovny htab (řešení IJC-DU2)
-// Licence: žádná (Public domain)
+/*
+ * @licence žádná (Public domain)
+ * @faculty VUT FIT 2021/2022
+ * @brief htab.h -- rozhraní knihovny htab (řešení IJC-DU2)
 
-// následující řádky zabrání násobnému vložení:
+ */
+
 #ifndef __HTAB_H__
 #define __HTAB_H__
 
-#include <stdbool.h>  // bool
-#include <string.h>   // size_t
+#include <stdbool.h>
+#include <string.h>
 
-// Tabulka:
-struct htab;  // neúplná deklarace struktury - uživatel nevidí obsah
-typedef struct htab htab_t;  // typedef podle zadání
+struct htab;
+typedef struct htab htab_t;
 
-// Typy:
-typedef const char* htab_key_t;  // typ klíče
-typedef int htab_value_t;        // typ hodnoty
+typedef const char* htab_key_t;
+typedef int htab_value_t;
 
-// Dvojice dat v tabulce:
 typedef struct htab_pair {
-    htab_key_t key;      // klíč
-    htab_value_t value;  // asociovaná hodnota
-} htab_pair_t;           // typedef podle zadání
+    htab_key_t key;
+    htab_value_t value;
+} htab_pair_t;
 
-// Rozptylovací (hash) funkce (stejná pro všechny tabulky v programu)
-// Pokud si v programu definujete stejnou funkci, použije se ta vaše.
 size_t htab_hash_function(htab_key_t str);
 
-// Funkce pro práci s tabulkou:
-htab_t* htab_init(size_t n);                // konstruktor tabulky
-size_t htab_size(const htab_t* t);          // počet záznamů v tabulce
-size_t htab_bucket_count(const htab_t* t);  // velikost pole
-void htab_resize(htab_t* t, size_t newn);   // změna velikosti pole
-                                            // (umožňuje rezervaci místa)
+htab_t* htab_init(size_t n);
+size_t htab_size(const htab_t* t);
+size_t htab_bucket_count(const htab_t* t);
+void htab_resize(htab_t* t, size_t newn);
 
-htab_pair_t* htab_find(htab_t* t, htab_key_t key);  // hledání
+htab_pair_t* htab_find(htab_t* t, htab_key_t key);
 htab_pair_t* htab_lookup_add(htab_t* t, htab_key_t key);
 
-bool htab_erase(htab_t* t, htab_key_t key);  // ruší zadaný záznam
+bool htab_erase(htab_t* t, htab_key_t key);
 
-// for_each: projde všechny záznamy a zavolá na ně funkci f
-// Pozor: f nesmí měnit klíč .key ani přidávat/rušit položky
 void htab_for_each(const htab_t* t, void (*f)(htab_pair_t* data));
 
-void htab_clear(htab_t* t);  // ruší všechny záznamy
-void htab_free(htab_t* t);   // destruktor tabulky
+void htab_clear(htab_t* t);
+void htab_free(htab_t* t);
 
-#endif  // __HTAB_H__
+#endif

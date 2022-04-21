@@ -17,19 +17,26 @@ tail: tail.o error.o
 	$(CC) $(CFLAGS) $(OBJ) -o tail
 
 wordcount: htab_lib error.o wordcount_c.o io.o
-	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount htablib.a
+	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount libhtab.a
+
+#testprg: htab_lib error.o io.o testprg.o
+#	$(CC) $(CFLAGS) error.o testprg.o io.o -o testprg libhtab.a
 
 wordcount-dynamic: error.o htab_dynamic wordcount_c.o io.o
-	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount-dynamic htablib.so
+	$(CC) $(CFLAGS) error.o wordcount_c.o io.o -o wordcount-dynamic libhtab.so
 
 htab_lib: htab_static
-	ar rsv htablib.a htab_*.o
+	ar rsv libhtab.a htab_*.o
+
+#testprg.o: error.o io.o 
+#	$(CC) $(CFLAGS) -c libhtab.c -o testprg.o
+
 
 htab_static: error.o htab.h
 	$(CC) $(CFLAGS) -c htab_*.c
 
 htab_dynamic: htab.h htab_private.h
-	gcc -shared -o htablib.so -fpic htab_*.c
+	gcc -shared -o libhtab.so -fpic htab_*.c
 
 io.o: error.o
 	$(CC) $(CFLAGS) -c io.c -o io.o
@@ -46,7 +53,7 @@ tail.o: tail.c error.o
 #util
 
 clean: 
-	rm $(EXEC) *.o *.out *.zip
+	rm $(EXEC) *.o *.out *.zip *.so *.a
 
 zip:
 	zip xdolez0c.zip *.c *.h Makefile

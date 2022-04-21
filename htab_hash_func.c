@@ -1,3 +1,10 @@
+/*
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief htab_hash_func.c hash function
+ * @date 19.4.2022
+ */
+
 #include <stdint.h>
 #include "htab_private.h"
 

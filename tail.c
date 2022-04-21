@@ -1,4 +1,10 @@
-#include "tail.h"
+/*
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief tail.c POSIX tail
+ * @date 19.4.2022
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +17,7 @@
 
 int main(int argc, char* argv[]) {
     // param check
+    bool warn = false;
     bool error = false;
     if (argc > 4) {
         error_exit(
@@ -116,7 +123,20 @@ int main(int argc, char* argv[]) {
 
     int idx = 0;
     bool rotate = false;
-    while ((fgets(buffer[idx], LIMIT, file)) != NULL) {
+    while ((fgets(buffer[idx], LIMIT + 1, file)) != NULL) {
+        if (buffer[idx][LIMIT - 1] != '\n' && strlen(buffer[idx]) == LIMIT) {
+            buffer[idx][LIMIT] = '\n';
+            buffer[idx][LIMIT + 1] = '\0';
+
+            if (warn == false) {
+                warning_msg("Chyba: překročen implementační limit řádku.");
+                warn = true;
+            }
+            while (fgetc(file) != '\n') {
+            }
+            //
+        }
+
         idx++;
         if (idx == n) {
             rotate = true;
@@ -143,44 +163,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-/*
-
-steps
-
-parserovat inputs
-    -2 options: ./tail soubor | ./tail -n int soubor
-        else erorr
-
-
-otevrit soubor
-    -zkontrolovat
-
-alokovat n radku do cyklyckeho bufferu (10 default)
-    -kontrola mallocu
-    -array of pointers na kazdy radek 4095 znaku dlouhy
-
-projizdeni souboru fgets ukladani do bufferu cyklit kdyz jde pres limit
-
-na konci projizdeni souboru vytisknout obsah bufferu na stdin
-
-
-cyklicky buffer
----------------
-
-
--> radek 1
--> radek 2
--> radek 3
--> radek 4
-
-
-radek 1 prepsat
-shift array to left
-
--> radek 2
--> radek 3
--> radek 4
--> radek 5
-
-*/

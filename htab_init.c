@@ -1,3 +1,10 @@
+/*
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief htab_init.c initializes hash table
+ * @date 19.4.2022
+ */
+
 #include <stdlib.h>
 #include "error.h"
 #include "htab_private.h"

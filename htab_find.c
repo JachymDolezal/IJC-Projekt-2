@@ -1,3 +1,10 @@
+/*
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief htab_find.c finds given pair in hash table
+ * @date 19.4.2022
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include "htab_private.h"

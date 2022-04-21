@@ -1,9 +1,8 @@
 /*
- * error.h
- * IJC-DU1, příklad a), 18.3.2022
- * Autor: Jáchym Doležal, FIT
- * Login: xdolez0c
- * Přeloženo: gcc 11.2
+ * @name Jáchym Doležal, xdolez0c
+ * @faculty VUT FIT 2021/2022
+ * @brief error.h
+ * @date 19.4.2022
  */
 
 void warning_msg(const char* fmt, ...);
