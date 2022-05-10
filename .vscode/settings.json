@@ -2,6 +2,10 @@
     "files.associations": {
         "stdio.h": "c",
         "stdlib.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "stdbool.h": "c",
+        "utility": "c",
+        "cctype": "c",
+        "htab_private.h": "c"
     }
 }
